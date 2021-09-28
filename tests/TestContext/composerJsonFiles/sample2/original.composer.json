@@ -1,0 +1,25 @@
+{
+    "name": "antonioprimera/lara-packager",
+    "description": "Yet another laravel package skeleton utility...",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "John Wick",
+            "email": "jw@cus.ro"
+        }
+    ],
+    "minimum-stability": "dev",
+
+    "require": {
+        "symfony/console": "6.0.x-dev",
+        "ext-json": "*",
+        "phpunit/phpunit": "^9.5"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "AntonioPrimera\\LaraPackager\\": "src/src1/"
+        }
+    }
+}

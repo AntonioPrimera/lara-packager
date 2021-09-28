@@ -1,0 +1,12 @@
+{
+    "name": "someVendorName\/somePackageName",
+    "description": "some description",
+    "minimum-stability": "some stability",
+    "license": "some license",
+    "authors": [
+        {
+            "name": "dev",
+            "email": "email@example.com"
+        }
+    ]
+}
