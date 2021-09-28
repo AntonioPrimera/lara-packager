@@ -16,8 +16,25 @@ class Paths
 		return ($absolutePath ? '/' : '') . implode(DIRECTORY_SEPARATOR, $cleanParts);
 	}
 	
-	public static function rootPath($path = null)
+	/**
+	 * The root path of antonioprimera/lara-packager
+	 *
+	 * @param string|null $path
+	 *
+	 * @return string
+	 */
+	public static function rootPath(?string $path = null)
 	{
-		return $path ?: getcwd();
+		return $path ?: dirname(__DIR__, 2);
+	}
+	
+	/**
+	 * The root path of the package to be developed
+	 *
+	 * @return false|string
+	 */
+	public static function packageRootPath()
+	{
+		return getcwd();
 	}
 }

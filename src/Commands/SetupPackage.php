@@ -25,21 +25,16 @@ class SetupPackage extends Command
 		$verbose = true;
 		
 		$output->writeln("Updating the composer.json");
-		UpdateComposerJson::run(Paths::rootPath(), $this, $input, $output, $verbose);
+		UpdateComposerJson::run(Paths::packageRootPath(), $this, $input, $output, $verbose);
 		
 		$output->writeln("Creating the package folders");
 		CreateFolderStructure::run(getcwd(), $output, $verbose);
 		
 		$output->writeln("Creating the ServiceProvider");
-		
-		//$this->createFolders($output);
-		
-		//$helper = $this->getHelper('question');
-		//
-		//$question = new Question('Package name: ');
-		//$packageName = $helper->ask($input, $output, $question);
-		//
-		//$output->writeln("Your package name is: " . $packageName);
+		copy(
+			Paths::path(Paths::rootPath(), 'stubs/PackageServiceProvider.php'),
+			Paths::path(Paths::packageRootPath(), 'PackageServiceProvider.php')
+		);
 		
 		return Command::SUCCESS;
 	}

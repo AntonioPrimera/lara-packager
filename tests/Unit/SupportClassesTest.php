@@ -21,7 +21,7 @@ class SupportClassesTest extends TestCase
 	/** @test */
 	public function root_path_should_work_correctly()
 	{
-		$this->assertEquals(getcwd(), Paths::rootPath());
+		$this->assertEquals(dirname(__DIR__, 2), Paths::rootPath());
 		$this->assertEquals('/src/test', Paths::rootPath('/src/test'));
 	}
 	
