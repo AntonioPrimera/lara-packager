@@ -23,9 +23,9 @@ class Paths
 	 *
 	 * @return string
 	 */
-	public static function rootPath(?string $path = null)
+	public static function rootPath(...$parts)
 	{
-		return $path ?: dirname(__DIR__, 2);
+		return static::path(dirname(__DIR__, 2), ...$parts); //$path ?: dirname(__DIR__, 2);
 	}
 	
 	/**
@@ -33,9 +33,9 @@ class Paths
 	 *
 	 * @return false|string
 	 */
-	public static function packageRootPath()
+	public static function packageRootPath(...$parts)
 	{
-		return getcwd();
+		return static::path(getcwd(), ...$parts);
 	}
 	
 	
@@ -43,6 +43,6 @@ class Paths
 	
 	public static function stubPath(string $stubName)
 	{
-		return static::path(static::rootPath(), 'src/stubs/' . $stubName);
+		return static::rootPath('src/stubs/', $stubName); //static::path(static::rootPath(), 'src/stubs/' . $stubName);
 	}
 }

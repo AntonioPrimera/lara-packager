@@ -94,14 +94,28 @@ class ComposerJson
 	
 	public function setAuthor($name, $email)
 	{
-		Arrays::set($this->contents, ['authors'][0], compact('name', 'email'));
+		$authors = $this->getAuthors();
+		
+		//overwrite the first author (if any) with the current author
+		$authors[0] = compact('name', 'email');
+		$this->contents['authors'] = $authors;
+		
 		return $this;
 	}
 	
 	public function addAuthor($name, $email)
 	{
-		Arrays::push($this->contents, 'authors', compact('name', 'email'));
+		$authors = $this->getAuthors();
+		$authors[] = compact('name', 'email');
+		$this->contents['authors'] = $authors;
+		
 		return $this;
+	}
+	
+	public function getAuthors()
+	{
+		$authors = $this->contents['authors'] ?? [];
+		return is_array($authors) ? $authors : [];
 	}
 	
 	public function setMinimumStability($stability)

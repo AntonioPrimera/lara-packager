@@ -114,6 +114,7 @@ class UpdateComposerJson
 		$composerJson->setName($questions->packageName->answer)
 			->setDescription($questions->packageDescription->answer)
 			->setLicense($questions->license->answer)
+			->setAuthor($questions->authorName->answer, $questions->authorEmail->answer)
 			->addPsr4Autoload($rootNamespace, 'src/', false)
 			->addPsr4Autoload($testNamespace, 'tests/', true);
 		
@@ -131,12 +132,13 @@ class UpdateComposerJson
 				false
 			);
 		
-		$composerJson->addServiceProvider(
-			ServiceProviderName::nameWithNamespace(
-				$rootNamespace,
-				$questions->serviceProviderName->answer
-			)
-		);
+		if ($questions->createServiceProvider->answeredYes)
+			$composerJson->addServiceProvider(
+				ServiceProviderName::nameWithNamespace(
+					$rootNamespace,
+					$questions->serviceProviderName->answer
+				)
+			);
 	}
 	
 	//protected static function prepareUpdateData() : array

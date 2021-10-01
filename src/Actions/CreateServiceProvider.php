@@ -11,6 +11,9 @@ class CreateServiceProvider
 {
 	public static function run(QuestionSet $questions)
 	{
+		if (!$questions->createServiceProvider->answeredYes)
+			return;
+		
 		$stubName = $questions->spatieLaravelPackageTools->answeredYes
 			? 'SpatiePackageToolsServiceProvider.php'
 			: 'PackageServiceProvider.php';

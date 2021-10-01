@@ -165,7 +165,7 @@ class ConsoleQuestion
 	 *
 	 * @return ConsoleQuestion
 	 */
-	public function defaultValue(string | int | callable | bool $defaultValue) : static
+	public function defaultValue(string | int | callable | bool | null $defaultValue) : static
 	{
 		$this->defaultValue = $defaultValue;
 		return $this;

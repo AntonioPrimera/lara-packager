@@ -76,21 +76,28 @@ class AskQuestions
 				return $questionSet->orchestraTestbench->answeredYes;
 			});
 		
+		$questionSet->createQuestion('createServiceProvider')
+			->text('Do you want to add a ServiceProvider to your package?')
+			->yesNoQuestion()
+			->defaultValue('y');
+		
 		$questionSet->createQuestion('spatieLaravelPackageTools')
 			->text('Do you want to use spatie/laravel-package-tools?')
 			->yesNoQuestion()
 			->defaultValue('y')
 			->context($composerJson)
-			->condition(function(LaravelPackageComposerJson $composerJson) {
+			->condition(function(LaravelPackageComposerJson $composerJson, QuestionSet $questionSet) {
 				//if we already have it in the composer->require list, don't ask this question
-				return !$composerJson->requires('spatie/laravel-package-tools');
+				return $questionSet->createServiceProvider->answeredYes
+					&& !$composerJson->requires('spatie/laravel-package-tools');
 			});
 		
 		$questionSet->createQuestion('spatieLaravelPackageToolsVersion')
 			->text('Which version of spatie/laravel-package-tools do you want to use?')
 			->defaultValue('^1.9')
 			->condition(function($context, QuestionSet $questionSet) {
-				return $questionSet->spatieLaravelPackageTools->answeredYes;
+				return $questionSet->createServiceProvider->answeredYes
+					&& $questionSet->spatieLaravelPackageTools->answeredYes;
 			});
 		
 		$questionSet->createQuestion('rootNamespace')
@@ -103,7 +110,10 @@ class AskQuestions
 				function($context, QuestionSet $questionSet) {
 					return ServiceProviderName::generateFromPackageName($questionSet->packageName->answer);
 				},
-			);
+			)->condition(function($context, QuestionSet $questionSet) {
+				//only if the user requires a service provider for their package
+				return $questionSet->createServiceProvider->answeredYes;
+			});
 		
 		return $questionSet;
 	}
