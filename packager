@@ -3,12 +3,12 @@
 
 require getcwd() . '/vendor/autoload.php';
 
-use AntonioPrimera\LaraPackager\Commands\SetupPackage;
+use AntonioPrimera\LaraPackager\Commands\CreateGitignore;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
 
 //register commands
-$application->add(new SetupPackage());
+$application->add(new CreateGitignore());
 
 $application->run();
