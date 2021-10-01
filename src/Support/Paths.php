@@ -37,4 +37,12 @@ class Paths
 	{
 		return getcwd();
 	}
+	
+	
+	//--- Specific paths ----------------------------------------------------------------------------------------------
+	
+	public static function stubPath(string $stubName)
+	{
+		return static::path(static::rootPath(), 'src/stubs/' . $stubName);
+	}
 }

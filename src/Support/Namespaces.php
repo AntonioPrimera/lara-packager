@@ -20,11 +20,6 @@ class Namespaces
 	
 	public static function createForComposerAutoload(...$parts)
 	{
-		return static::doubleBackSlashes(static::create(...$parts) . '\\');
-	}
-	
-	public static function doubleBackSlashes(string $ns)
-	{
-		return str_replace('\\', '\\\\', $ns);
+		return static::create(...$parts) . '\\';
 	}
 }

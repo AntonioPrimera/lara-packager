@@ -2,174 +2,207 @@
 
 namespace AntonioPrimera\LaraPackager\Actions;
 
-use AntonioPrimera\LaraPackager\Support\Arrays;
-use AntonioPrimera\LaraPackager\Support\ComposerJsonManager;
+use AntonioPrimera\LaraPackager\Components\LaravelPackageComposerJson;
 use AntonioPrimera\LaraPackager\Support\Namespaces;
-use AntonioPrimera\LaraPackager\Support\Paths;
+use AntonioPrimera\LaraPackager\Components\QuestionSet;
 use AntonioPrimera\LaraPackager\Support\ServiceProviderName;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 class UpdateComposerJson
 {
 	
-	protected static $questions;
-	
 	public static function run(
-		string $rootPath,
+		LaravelPackageComposerJson $composerJson,
+		QuestionSet $questionSet,
 		Command $command,
 		InputInterface $input,
 		OutputInterface $output,
 		$verbose
 	)
 	{
-		$composerJson = ComposerJsonManager::readFile($rootPath);
-		static::setupQuestions($composerJson);
-		static::askQuestions($command, $input, $output);
-		
-		$updateData = static::prepareUpdateData();
-		$updatedComposerJson = ComposerJsonManager::updateArray($composerJson, $updateData);
-		
-		ComposerJsonManager::writeFile($rootPath, $updatedComposerJson);
+		static::updateComposerJson($composerJson, $questionSet);
+		$composerJson->writeFile(true);
 	}
 	
-	protected static function prepareUpdateData() : array
+	//protected static function setupQuestions(
+	//	Command $command,
+	//	InputInterface $input,
+	//	OutputInterface $output,
+	//	LaravelPackageComposerJson $composerJson
+	//)
+	//{
+	//	$questionSet = new QuestionSet();
+	//	$questionSet->setupQuestionFactory($command, $input, $output);
+	//
+	//	$questionSet->createQuestion('packageName')
+	//		->text('Package name')
+	//		->defaultValue($composerJson->get('name', null))
+	//		->example('namespace/package-name');
+	//
+	//	$questionSet->createQuestion('packageDescription')
+	//		->text('Package description')
+	//		->defaultValue($composerJson->get('description', null));
+	//
+	//	$questionSet->createQuestion('authorName')
+	//		->text('Author name')
+	//		->defaultValue($composerJson->get(['authors', 0, 'name'], null));
+	//
+	//	$questionSet->createQuestion('authorEmail')
+	//		->text('Author email')
+	//		->defaultValue($composerJson->get(['authors', 0, 'email'], null));
+	//
+	//	$questionSet->createQuestion('license')
+	//		->text('License')
+	//		->defaultValue($composerJson->get('license', 'MIT'));
+	//
+	//	$questionSet->createQuestion('orchestraTestbench')
+	//		->text('Do you want to use orchestra/testbench?')
+	//		->yesNoQuestion()
+	//		->defaultValue('y')
+	//		->context($composerJson)
+	//		->condition(function(LaravelPackageComposerJson $composerJson) {
+	//			//if we already have it in the require-dev, don't ask this question
+	//			return !$composerJson->requiresDev('orchestra/testbench');
+	//		});
+	//
+	//	$questionSet->createQuestion('orchestraTestbenchVersion')
+	//		->text('Which version of orchestra/testbench do you want to use?')
+	//		->defaultValue('^6.0')
+	//		->condition(function($context, QuestionSet $questionSet) {
+	//			return $questionSet->orchestraTestbench->answeredYes;
+	//		});
+	//
+	//	$questionSet->createQuestion('spatieLaravelPackageTools')
+	//		->text('Do you want to use spatie/laravel-package-tools?')
+	//		->yesNoQuestion()
+	//		->defaultValue('y')
+	//		->context($composerJson)
+	//		->condition(function(LaravelPackageComposerJson $composerJson) {
+	//			//if we already have it in the composer->require list, don't ask this question
+	//			return !$composerJson->requires('spatie/laravel-package-tools');
+	//		});
+	//
+	//	$questionSet->createQuestion('orchestraTestbenchVersion')
+	//		->text('Which version of spatie/laravel-package-tools do you want to use?')
+	//		->defaultValue('^1.9')
+	//		->condition(function($context, QuestionSet $questionSet) {
+	//			return $questionSet->spatieLaravelPackageTools->answeredYes;
+	//		});
+	//
+	//	$questionSet->createQuestion('rootNamespace')
+	//		->text('Root namespace')
+	//		->example('AntonioPrimera\\LaraPackager');
+	//
+	//	$questionSet->createQuestion('serviceProviderName')
+	//		->text('Service Provider name')
+	//		->defaultValue(
+	//			function($context, QuestionSet $questionSet) {
+	//				return ServiceProviderName::generateFromPackageName($questionSet->packageName->answer);
+	//			},
+	//		);
+	//
+	//	return $questionSet;
+	//}
+	
+	protected static function updateComposerJson(LaravelPackageComposerJson $composerJson, QuestionSet $questions)
 	{
-		$rootNamespace = Namespaces::createForComposerAutoload(static::$questions['rootNamespace']['answer']);
-		$testNamespace = Namespaces::createForComposerAutoload(
-			static::$questions['rootNamespace']['answer'],
-			'Tests'
+		$rootNamespace = Namespaces::createForComposerAutoload($questions->rootNamespace->answer);
+		$testNamespace = Namespaces::createForComposerAutoload($rootNamespace, 'Tests');
+		
+		$composerJson->setName($questions->packageName->answer)
+			->setDescription($questions->packageDescription->answer)
+			->setLicense($questions->license->answer)
+			->addPsr4Autoload($rootNamespace, 'src/', false)
+			->addPsr4Autoload($testNamespace, 'tests/', true);
+		
+		if ($questions->orchestraTestbench->answeredYes)
+			$composerJson->addRequired(
+				'orchestra/testbench',
+				$questions->orchestraTestbenchVersion->answer,
+				true
+			);
+		
+		if ($questions->spatieLaravelPackageTools->answeredYes)
+			$composerJson->addRequired(
+				'spatie/laravel-package-tools',
+				$questions->spatieLaravelPackageToolsVersion->answer,
+				false
+			);
+		
+		$composerJson->addServiceProvider(
+			ServiceProviderName::nameWithNamespace(
+				$rootNamespace,
+				$questions->serviceProviderName->answer
+			)
 		);
-		
-		return [
-			'packageName' => [
-				'path'		=> 'name',
-				'action'  	=> 'set',
-				'value'	 	=> static::$questions['packageName']['answer'],
-			],
-			
-			'packageDescription' => [
-				'path'		=> 'description',
-				'action'  	=> 'set',
-				'value'	 	=> static::$questions['packageDescription']['answer'],
-			],
-			
-			'license' => [
-				'path'	   => 'license',
-				'action'   => 'set',
-				'value'	 	=> static::$questions['license']['answer'],
-			],
-			
-			'orchestraTestbench' => [
-				'path'		=> 'require-dev.orchestra/testbench',
-				'action'	=> 'set',
-				'value'	 	=> static::$questions['orchestraTestbenchVersion']['answer'],
-			],
-			
-			'autoload' => [
-				'path'		=> ['autoload', 'psr-4', $rootNamespace],
-				'action'	=> 'set',
-				'value'		=> 'src/',
-			],
-			
-			'autoloadDev' => [
-				'path'		=> ['autoload-dev', 'psr-4', $testNamespace],
-				'action'	=> 'set',
-				'value'		=> 'tests/',
-			],
-			
-			'serviceProvider' => [
-				'path'		=> 'extra.laravel.providers',
-				'action'	=> 'push',
-				'value'		=> ServiceProviderName::generate(
-					$rootNamespace,
-					static::$questions['packageName']['answer']
-				),
-			],
-		];
 	}
 	
-	protected static function setupQuestions(array $composerJson)
-	{
-		static::$questions = [
-			'packageName' => [
-				'question' => 'Package name (namespace/package-name): ',
-				'path'	   => 'name',
-				'action'   => 'set',
-				'default'  => $composerJson['name'] ?? null,
-			],
-			'packageDescription' => [
-				'question' => 'Package description: ',
-				'path'	   => 'description',
-				'action'   => 'set',
-				'default'  => $composerJson['description'] ?? null,
-			],
-			
-			'authorName' => [
-				'question' => 'Author name: ',
-				'path'	   => ['authors', 0, 'name'],
-				'action'   => 'set',
-				'default'  => $composerJson['authors'][0]['name'] ?? null,
-			],
-			'authorEmail' => [
-				'question' => 'Author email: ',
-				'path'	   => ['authors', 0, 'email'],
-				'action'   => 'set',
-				'default'  => $composerJson['authors'][0]['email'] ?? null,
-			],
-			'license' => [
-				'question' => 'License: ',
-				'path'	   => 'license',
-				'action'   => 'set',
-				'default'  => $composerJson['license'] ?? null,
-			],
-			
-			'orchestraTestbench' => [
-				'question'  => 'Do you want to use Orchestra/Testbench [y/n] ',
-				'action'	=> false,
-				'condition' => function() use ($composerJson) {
-					//if we already have it in the require-dev, don't ask this question
-					$requireDev = $composerJson['require-dev'] ?? [];
-					foreach ($requireDev as $item)
-						if (stripos($item, 'orchestra/testbench') !== false)
-							return false;
-					
-					return true;
-				}
-			],
-			'orchestraTestbenchVersion' => [
-				'question'  => 'Which version of orchestra/testbench do you want to use? (e.g. ^6.0) ',
-				'path'		=> 'require-dev.orchestra/testbench',
-				'action'	=> 'set',
-				'condition' => function() {
-					return static::$questions['orchestraTestbench']['answer'] ?? false;
-				}
-			],
-			
-			'rootNamespace' => [
-				'question' => 'Root namespace (e.g. AntonioPrimera\\LaraPackager) : ',
-			],
-		];
-	}
-	
-	protected static function askQuestions(
-		Command $command,
-		InputInterface $input,
-		OutputInterface $output
-	)
-	{
-		$helper = $command->getHelper('question');
-		foreach (static::$questions as $questionData) {
-			//if there is a callable condition, and it returns false, don't ask this question
-			if (is_callable($questionData['condition'] ?? false) && !$questionData['condition']())
-				continue;
-			
-			$question = new Question($questionData['question'], $questionData['default'] ?? false);
-			$questionData['answer'] = $helper->ask($input, $output, $question);
-		}
-	}
+	//protected static function prepareUpdateData() : array
+	//{
+	//	$qs = static::$questionSet;
+	//
+	//	$rootNamespace = Namespaces::createForComposerAutoload($qs->rootNamespace->answer);
+	//	$testNamespace = Namespaces::createForComposerAutoload($rootNamespace, 'Tests');
+	//
+	//	return [
+	//		//'packageName' => [
+	//		//	'path'		=> 'name',
+	//		//	'action'  	=> 'set',
+	//		//	'value'	 	=> strtolower($q['packageName']['answer']),
+	//		//],
+	//		//
+	//		//'packageDescription' => [
+	//		//	'path'		=> 'description',
+	//		//	'action'  	=> 'set',
+	//		//	'value'	 	=> $q['packageDescription']['answer'],
+	//		//],
+	//		//
+	//		//'license' => [
+	//		//	'path'	   => 'license',
+	//		//	'action'   => 'set',
+	//		//	'value'	 	=> $q['license']['answer'],
+	//		//],
+	//
+	//		//'orchestraTestbench' => [
+	//		//	'path'		=> 'require-dev.orchestra/testbench',
+	//		//	'action'	=> 'set',
+	//		//	'value'	 	=> stripos($q['orchestraTestbench']['answer'], 'y') !== false
+	//		//		? $q['orchestraTestbenchVersion']['answer']
+	//		//		: false,
+	//		//],
+	//		//
+	//		//'spatiePackageTools' => [
+	//		//	'path'		=> 'require.spatie/laravel-package-tools',
+	//		//	'action'	=> 'set',
+	//		//	'value'	 	=> stripos($q['spatieLaravelPackageTools']['answer'], 'y') !== false
+	//		//		? $q['spatieLaravelPackageToolsVersion']['answer']
+	//		//		: false,
+	//		//],
+	//
+	//		//'autoload' => [
+	//		//	'path'		=> ['autoload', 'psr-4', $rootNamespace],
+	//		//	'action'	=> 'set',
+	//		//	'value'		=> 'src/',
+	//		//],
+	//		//
+	//		//'autoloadDev' => [
+	//		//	'path'		=> ['autoload-dev', 'psr-4', $testNamespace],
+	//		//	'action'	=> 'set',
+	//		//	'value'		=> 'tests/',
+	//		//],
+	//
+	//		//'serviceProvider' => [
+	//		//	'path'		=> 'extra.laravel.providers',
+	//		//	'action'	=> 'push',
+	//		//	'value'		=> ServiceProviderName::nameWithNamespace(
+	//		//		$rootNamespace,
+	//		//		$q['serviceProviderName']['answer']
+	//		//	),
+	//		//],
+	//	];
+	//}
 }
 
 //{

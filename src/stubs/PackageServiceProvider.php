@@ -1,17 +1,16 @@
 <?php
 
-namespace AntonioPrimera\LaraPackager\stubs;
+namespace DummyNamespace;
 use Illuminate\Support\ServiceProvider;
 
-class PackageServiceProvider extends ServiceProvider
+class DummyClass extends ServiceProvider
 {
 	public function boot()
 	{
-		//register necessary commands
-		if ($this->app->runningInConsole()) {
-			$this->commands([
-				//MakeBapi::class,
-			]);
-		}
+		//if ($this->app->runningInConsole()) {
+		//	$this->commands([
+		//		MyCommand::class,
+		//	]);
+		//}
 	}
 }

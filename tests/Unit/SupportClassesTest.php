@@ -40,12 +40,12 @@ class SupportClassesTest extends TestCase
 		
 		$this->assertEquals(
 			'AntonioPrimera\\LaraPackager\\Paths',
-			Namespaces::create('\\AntonioPrimera\\\\LaraPackager\\\\', '\\Paths\\\\')
+			Namespaces::create('\\AntonioPrimera\\LaraPackager\\', '\\Paths\\')
 		);
 		
 		$this->assertEquals(
 			'AntonioPrimera\\LaraPackager\\Paths',
-			Namespaces::create('\\AntonioPrimera\\\\', '\\\\LaraPackager\\', 'Paths\\')
+			Namespaces::create('\\AntonioPrimera\\', '\\LaraPackager\\', 'Paths\\')
 		);
 	}
 	
@@ -53,29 +53,29 @@ class SupportClassesTest extends TestCase
 	public function composer_json_namespace_creation_should_run_correctly()
 	{
 		$this->assertEquals(
-			'AntonioPrimera\\\\LaraPackager\\\\Paths\\\\',
+			'AntonioPrimera\\LaraPackager\\Paths\\',
 			Namespaces::createForComposerAutoload('\\AntonioPrimera\\LaraPackager\\', '\\Paths\\')
 		);
 		
 		$this->assertEquals(
-			'AntonioPrimera\\\\LaraPackager\\\\Paths\\\\',
-			Namespaces::createForComposerAutoload('\\\\AntonioPrimera\\LaraPackager\\', 'Paths')
+			'AntonioPrimera\\LaraPackager\\Paths\\',
+			Namespaces::createForComposerAutoload('\\AntonioPrimera\\LaraPackager\\', 'Paths')
 		);
 		
 		$this->assertEquals(
-			'AntonioPrimera\\\\LaraPackager\\\\Paths\\\\',
+			'AntonioPrimera\\LaraPackager\\Paths\\',
 			Namespaces::createForComposerAutoload('AntonioPrimera', 'LaraPackager', 'Paths')
 		);
 	}
 	
 	/** @test */
-	public function service_provider_name_should_be_generated_correctly()
+	public function service_provider_name_with_namespace_should_be_generated_correctly()
 	{
 		$this->assertEquals(
-			'AntonioPrimera\\\\LaraPackager\\\\LaraPackagerServiceProvider',
-			ServiceProviderName::generate(
+			'AntonioPrimera\\LaraPackager\\LaraPackagerServiceProvider',
+			ServiceProviderName::nameWithNamespace(
 				'AntonioPrimera\\LaraPackager',
-				'antonioprimera/lara-packager'
+				ServiceProviderName::generateFromPackageName('antonioprimera/lara-packager')
 			)
 		);
 	}

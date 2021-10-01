@@ -38,7 +38,7 @@ class ComposerJsonManager
 		if (file_exists($filePath))
 			copy($filePath, $filePath . '.bak');
 		
-		file_put_contents($filePath, json_encode($contents, JSON_PRETTY_PRINT));
+		file_put_contents($filePath, json_encode($contents, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 	}
 	
 	public static function updateArray(array $contents, array $updateData)
