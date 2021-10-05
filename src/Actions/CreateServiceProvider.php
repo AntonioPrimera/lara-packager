@@ -4,6 +4,7 @@ namespace AntonioPrimera\LaraPackager\Actions;
 
 use AntonioPrimera\LaraPackager\Components\FileManager;
 use AntonioPrimera\LaraPackager\Components\QuestionSet;
+use AntonioPrimera\LaraPackager\Support\Namespaces;
 use AntonioPrimera\LaraPackager\Support\Paths;
 use AntonioPrimera\LaraPackager\Support\ServiceProviderName;
 
@@ -22,7 +23,7 @@ class CreateServiceProvider
 			Paths::stubPath($stubName),
 			Paths::path(Paths::packageRootPath(), ServiceProviderName::fileName($questions->serviceProviderName->answer)),
 			[
-				'DummyNamespace'   => $questions->rootNamespace->answer,
+				'DummyNamespace'   => Namespaces::create($questions->rootNamespace->answer),
 				'DummyClass'	   => $questions->serviceProviderName->answer,
 				'DummyPackageName' => $questions->packageName->answer,
 			]

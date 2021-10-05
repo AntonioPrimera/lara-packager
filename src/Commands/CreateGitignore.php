@@ -2,17 +2,10 @@
 
 namespace AntonioPrimera\LaraPackager\Commands;
 
-use AntonioPrimera\LaraPackager\Actions\AskQuestions;
-use AntonioPrimera\LaraPackager\Actions\CreateFolderStructure;
-use AntonioPrimera\LaraPackager\Actions\CreateServiceProvider;
 use AntonioPrimera\LaraPackager\Actions\MergeGitIgnore;
-use AntonioPrimera\LaraPackager\Actions\UpdateComposerJson;
-use AntonioPrimera\LaraPackager\Components\FileManager;
-use AntonioPrimera\LaraPackager\Components\LaravelPackageComposerJson;
 use AntonioPrimera\LaraPackager\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CreateGitignore extends Command

@@ -10,10 +10,10 @@ class Namespaces
 		$cleanParts = [];
 		
 		foreach ($parts as $part) {
-			$partSegments = array_filter(explode('\\', $part));
+			//we replace '/' with '\\' in case you accidentally type it wrong
+			$partSegments = array_filter(explode('\\', str_replace('/', '\\', $part)));
 			$cleanParts = array_merge($cleanParts, $partSegments);
 		}
-			//$cleanParts[] = trim($part, '\\');
 		
 		return implode('\\', $cleanParts);
 	}

@@ -3,12 +3,19 @@
 
 require getcwd() . '/vendor/autoload.php';
 
+use AntonioPrimera\LaraPackager\Commands\CreateBaseTestCase;
 use AntonioPrimera\LaraPackager\Commands\CreateGitignore;
+use AntonioPrimera\LaraPackager\Commands\MakeTest;
+use AntonioPrimera\LaraPackager\Commands\SetupPackage;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
 
 //register commands
-$application->add(new CreateGitignore());
+$application->add(new SetupPackage());			//setup:package
+$application->add(new CreateGitignore());		//create:gitignore
+
+$application->add(new MakeTest());				//make:test
+$application->add(new CreateBaseTestCase());	//create:base-test-case
 
 $application->run();

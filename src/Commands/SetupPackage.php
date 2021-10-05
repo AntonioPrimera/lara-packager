@@ -5,10 +5,12 @@ namespace AntonioPrimera\LaraPackager\Commands;
 use AntonioPrimera\LaraPackager\Actions\AskQuestions;
 use AntonioPrimera\LaraPackager\Actions\CreateFolderStructure;
 use AntonioPrimera\LaraPackager\Actions\CreateServiceProvider;
+use AntonioPrimera\LaraPackager\Actions\CreateTestCase;
 use AntonioPrimera\LaraPackager\Actions\MergeGitIgnore;
 use AntonioPrimera\LaraPackager\Actions\UpdateComposerJson;
 use AntonioPrimera\LaraPackager\Components\FileManager;
 use AntonioPrimera\LaraPackager\Components\LaravelPackageComposerJson;
+use AntonioPrimera\LaraPackager\Components\TestEnvironment;
 use AntonioPrimera\LaraPackager\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,15 +30,6 @@ class SetupPackage extends Command
 	
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		//$output->writeln(Paths::packageRootPath());
-		//$output->writeln(Paths::packageRootPath('gigi', 'migi'));
-		//
-		//$output->writeln(Paths::rootPath());
-		//$output->writeln(Paths::rootPath('gigi', 'migi'));
-		//
-		//$output->writeln(Paths::stubPath('gigismigis.php'));
-		//die();
-		
 		$verbose = true;
 		$rootPath = Paths::packageRootPath();
 		
@@ -49,7 +42,7 @@ class SetupPackage extends Command
 		UpdateComposerJson::run($composerJson, $questions, $this, $input, $output, $verbose);
 		
 		$output->writeln("Creating the package folders");
-		CreateFolderStructure::run(getcwd(), $output, $verbose);
+		CreateFolderStructure::run();
 		
 		$output->writeln("Creating the ServiceProvider");
 		CreateServiceProvider::run($questions);
@@ -62,6 +55,9 @@ class SetupPackage extends Command
 		
 		$output->writeln("Merging the packager .gitignore with the existing .gitignore file");
 		MergeGitIgnore::run();
+		
+		$output->writeln("Setting up the test environment");
+		TestEnvironment::setup();	//creates the folders and the package testcase
 		
 		$output->writeln("Running composer update");
 		exec('composer update');
