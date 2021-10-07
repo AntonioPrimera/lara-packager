@@ -20,20 +20,24 @@ class TestEnvironment
 	
 	public static function createPackageTestCase()
 	{
-		$stubFilePath = Paths::stubPath('TestCase.php');
+		$stubFilePath = static::usesOrchestraTestbench()
+			? Paths::stubPath('tests/TestCase_Orchestra.php.stub')
+			: Paths::stubPath('tests/TestCase_PhpUnit.php.stub');
 		$projectFilePath = Paths::packageRootPath('tests', 'TestCase.php');
 		
 		if (file_exists($projectFilePath))
 			return false;
 		
+		$serviceProvider = static::getServiceProvider();
+		
 		FileManager::createFromStub(
 			$stubFilePath,
 			$projectFilePath,
 			[
-				'DummyNamespace'   		=> trim(static::getTestsNamespace(), '\\'),
-				'DummyParentTestCase'	=> static::usesOrchestraTestbench()
-					? '\\Orchestra\\Testbench\\TestCase'
-					: '\\PHPUnit\\Framework\\TestCase',
+				'DummyNamespace' => trim(static::getTestsNamespace(), '\\'),
+				'DummyServiceProvider' => $serviceProvider
+					? '\\' . $serviceProvider
+					: '// \\Your\\Package\\Namespace\\YourServiceProvider',
 			]
 		);
 		
@@ -56,7 +60,7 @@ class TestEnvironment
 		$filePath = Paths::packageRootPath('tests', $unit ? 'Unit' : 'Feature', $fileName);
 		
 		FileManager::createFromStub(
-			Paths::stubPath('DummyTest.php'),
+			Paths::stubPath('tests/DummyTest.php.stub'),
 			$filePath,
 			[
 				'DummyNamespace'	  => $testNamespace . ($unit ? 'Unit' : 'Feature'),
@@ -72,7 +76,7 @@ class TestEnvironment
 	public static function createPhpUnitXml()
 	{
 		FileManager::createFromStub(
-			Paths::stubPath('phpunit.xml'),
+			Paths::stubPath('tests/phpunit.xml.stub'),
 			Paths::packageRootPath('phpunit.xml')
 		);
 	}
@@ -106,6 +110,14 @@ class TestEnvironment
 		$composerJson = static::getComposerJson();
 		return array_key_exists('orchestra/testbench', $composerJson->get('require-dev', []))
 			|| array_key_exists('orchestra/testbench', $composerJson->get('require', []));
+	}
+	
+	public static function getServiceProvider()
+	{
+		$composerJson = static::getComposerJson();
+		$providers = $composerJson->get('extra.laravel.providers', []);
+		
+		return $providers[0] ?? null;
 	}
 	
 	//--- Protected helpers -------------------------------------------------------------------------------------------
