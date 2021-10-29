@@ -21,7 +21,7 @@ class CreateServiceProvider
 		
 		FileManager::createFromStub(
 			Paths::stubPath($stubName),
-			Paths::path(Paths::packageRootPath(), ServiceProviderName::fileName($questions->serviceProviderName->answer)),
+			Paths::path(Paths::packageRootPath('src'), ServiceProviderName::fileName($questions->serviceProviderName->answer)),
 			[
 				'DummyNamespace'   => Namespaces::create($questions->rootNamespace->answer),
 				'DummyClass'	   => $questions->serviceProviderName->answer,
